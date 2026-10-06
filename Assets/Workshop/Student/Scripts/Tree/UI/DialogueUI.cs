@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using NUnit.Framework;
 using TMPro;
 using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using UnityEngine;
@@ -10,43 +11,52 @@ public class DialogueUI : MonoBehaviour
     public GameObject dialoguePanel;
     public TextMeshProUGUI npcText;
     public Transform choiceContainer;
-    public Button choiceButtonPrefab; // ลาก Prefab ปุ่มตัวเลือกมาใส่
+    public Button choiceButtonPrefab; // ร…ร’ยก Prefab ยปรรจรยตร‘รร ร…ร—รยกรร’รฃรรจ
     public GameObject closeButtonDialogue;
     private DialogueSequen InteractNpcSequen;
 
-    // เก็บปุ่มที่ถูกสร้างขึ้น เพื่อนำไปทำลาย/ซ่อนในภายหลัง
+    // ร ยกรงยบยปรรจรยทร•รจยถรยกรรรฉร’ยงยขร–รฉยน ร ยพร—รจรยนร“รคยปยทร“ร…ร’ร/ยซรจรยนรฃยนร€ร’รรร…ร‘ยง
     private List<Button> activeButtons = new List<Button>();
 
     public void Setup(DialogueSequen sequen)
     {
         //1. Set Dialogue Sequen
-
+        this.InteractNpcSequen = sequen;
+        DialogueNode currentNode = InteractNpcSequen.tree.root;
+        ShowDialogue(currentNode);
         //Show UI
+        dialoguePanel.SetActive(true);
         gameObject.SetActive(true);
         closeButtonDialogue.SetActive(false);
     }
 
     public void ShowDialogue(DialogueNode node)
     {
-        // 2. set ให้เป็น โหนดปัจจุบัน
-
-        // 3. แสดงข้อความของ NPC
-
-        // 4. ล้างปุ่มตัวเลือกเก่า
-
-        // 5. สร้างปุ่มตัวเลือกใหม่ตาม nexts
-   
+        // 2. set รฃรรฉร ยปรงยน รขรยนยดยปร‘ยจยจรยบร‘ยน
+        InteractNpcSequen.currentNode = node;
+        // 3. รกรยดยงยขรฉรยครร’รยขรยง NPC
+        npcText.text = node.text;
+        // 4. ร…รฉร’ยงยปรรจรยตร‘รร ร…ร—รยกร ยกรจร’
+        ClearChoices();
+        // 5. รรรฉร’ยงยปรรจรยตร‘รร ร…ร—รยกรฃรรรจยตร’ร nexts
+        var chois = new List<string>(node.nexts.Keys);
+        for (int i = 0; i < chois.Count; i++)
+        {
+            string choiceText = chois[i];
+            CreateChoiceButton(choiceText, i);
+        }
+        
     }
 
     private void CreateChoiceButton(string text, int index)
     {
         Button newButton = Instantiate(choiceButtonPrefab, choiceContainer);
 
-        // ตั้งค่าข้อความบนปุ่ม
+        // ยตร‘รฉยงยครจร’ยขรฉรยครร’รยบยนยปรรจร
         newButton.GetComponentInChildren<TextMeshProUGUI>().text = text;
 
-        // เพิ่ม Listener เมื่อกดปุ่ม
-        // ใช้ Lambda Expression เพื่อส่ง index กลับไปให้ DialogueManager
+        // ร ยพร”รจร Listener ร รร—รจรยกยดยปรรจร
+        // รฃยชรฉ Lambda Expression ร ยพร—รจรรรจยง index ยกร…ร‘ยบรคยปรฃรรฉ DialogueManager
         newButton.onClick.AddListener(() => OnChoiceSelected(index));
 
         activeButtons.Add(newButton);
@@ -63,7 +73,7 @@ public class DialogueUI : MonoBehaviour
 
     private void OnChoiceSelected(int index)
     {
-        // ส่ง index ของตัวเลือกที่ผู้เล่นเลือกกลับไปให้ DialogueManager จัดการ
+        // รรจยง index ยขรยงยตร‘รร ร…ร—รยกยทร•รจยผรรฉร ร…รจยนร ร…ร—รยกยกร…ร‘ยบรคยปรฃรรฉ DialogueManager ยจร‘ยดยกร’ร
         InteractNpcSequen.SelectChoice(index);
     }
     public void ShowCloseButtonDialog() {
